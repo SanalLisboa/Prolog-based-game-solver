@@ -1,3 +1,5 @@
+% written by Sanal Alick Lisboa
+%z5195127 UNSW
 :- style_check(-singleton).
 adjacent((X,Y),(X1,Y1)):-
     Y1 is Y+1,
@@ -22,7 +24,7 @@ s((X,Y),(XX,YY),1):-
    land_or_dropped(XX,YY).
    
 
-s((X,Y),(XX,YY),5000):-
+s((X,Y),(XX,YY),1000):-
    adjacent((X,Y),(XX,YY)),
    not(land_or_dropped(XX,YY)).
 
@@ -241,7 +243,7 @@ mergeSort([E1,E2|Es], SL) :-
 check(goal(X1, Y1)) :-
     not(agent_at(X1,Y1)),
     solve((X1,Y1),H,G,N),!,
-	G < 5000.
+	G < 1000.
 
 
 reverse(Xs,Ys) :- reverse(Xs,[],Ys).
@@ -291,13 +293,10 @@ get_action(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, A
 	;((agent_stones(1), Len > 0) ->
 	get_action1(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, Action))
 	;((agent_stones(0), L2 < 1) ->
-	adj(X1,Y1) ->
-	Intentions1 = intents([[goal(X,Y),P]|Inttail],[]),
-	Action = pick(X1,Y1)
-	;get_action21(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, Action)),!
+	get_action21(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, Action)),!
 	;((agent_stones(0), L2 > 0) ->
 	get_action31(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, Action),!)).
-
+	
 get_action3(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),[Headp|Tailp]]|PlanTail]), Intentions1, Action):-
 	Action = Headp,
 	Intentions1 = intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Tailp]|PlanTail]).
@@ -307,16 +306,13 @@ get_action31(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),[Headp|Tailp]]]), Int
 	Intentions1 = intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Tailp]]).
 	
 get_action2(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]|Tail]), Intentions1, Action):-
-    (adj(X1,Y1) ->
-	Intentions1 = intents([[goal(X,Y),P]|Inttail],Tail),
-	Action = pick(X1,Y1))
-    ;solve((X1,Y1),[Head|T],_,_),!,
+    solve((X1,Y1),[Head|T],_,_),!,
 	get_path1(T,S,Action,S),!,
 	Intentions1 = intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),S]|Tail]).
 
 get_action21(intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),Path]]), Intentions1, Action):-
     solve((X1,Y1),[Head|T],_,_),!,
-	get_path1(T,S,Action,T),!,
+	get_path1(T,S,Action,S),!,
 	Intentions1 = intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),S]]).
 	
 get_action1(intents([[goal(X,Y),[Headp|Tailp]]|Inttail],Plan), Intentions1, Action):-
@@ -344,31 +340,11 @@ get_path1([(X, Y)|Events],R,L) :-
 get_path1([(X, Y)],R,L) :-
     append([pick(X,Y)],R,S),
 	reverse(S,L),!.
-
-
-adj(X,Y):-
-    Y1 is Y+1,
-	X1 is X,
-	agent_at(X1,Y1).
-adj(X,Y):-
-    Y1 is Y-1,
-	X1 is X,
-	agent_at(X1,Y1).
-adj(X,Y):-
-    X1 is X-1,
-	Y1 is Y,
-	agent_at(X1,Y1).
-adj(X,Y):-
-    X1 is X+1,
-	Y1 is Y,
-	agent_at(X1,Y1).
-
+	
 update_intentions(at(A,B), Intentions, Intentions).
     
 update_intentions(picked(A,B), intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),S]|Tail]), Intentions1):-
 	Intentions1 = intents([[goal(X,Y),P]|Inttail],Tail).
-update_intentions(picked(A,B), intents([[goal(X,Y),P]|Inttail],[]), Intentions1):-
-	Intentions1 = intents([[goal(X,Y),P]|Inttail],[]).
 update_intentions(dropped(A,B), intents([[goal(X,Y),P]|Inttail],[[goal(X1,Y1),S]|Tail]), Intentions1):-	
 	Intentions1 = intents(Inttail,[[goal(X1,Y1),S]|Tail]).
 update_intentions(dropped(A,B), intents([[goal(X,Y),P]|Inttail],[]), Intentions1):-	
